@@ -4,9 +4,9 @@ from airflow import DAG
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 from airflow.contrib.sensors.file_sensor import FileSensor
-# from airflow.providers.apache.beam.operators.beam import BeamRunPythonPipelineOperator
+from airflow.providers.apache.beam.operators.beam import BeamRunPythonPipelineOperator
 import apache_beam as beam
-from apache_beam.runners.interactive.interactive_runner import InteractiveRunner
+# from apache_beam.runners.interactive.interactive_runner import InteractiveRunner
 
 from datetime import datetime, timedelta
 
@@ -37,7 +37,6 @@ with DAG(
         fs_conn_id='fs_default',
         filepath=ZIP_FILE_LOCATION,
         timeout=5,
-        poke_inteval=1,
         mode='poke'
     )
     unzip_file_task = BashOperator(
@@ -58,4 +57,4 @@ with DAG(
 
 # Defining the order of the tasks
 
-wait_for_archive_task >> unzip_file_task >> extract_content_beam_task
+wait_for_archive_task >> unzip_file_task >> extract_content_beam_task >> compute_averages_task

@@ -9,6 +9,13 @@ UNZIP_FOLDER_LOCATION = "/opt/airflow/logs/artifacts/unzipped_climate_data/"
 OUTPUT_TEXT_FILE = "/opt/airflow/logs/artifacts/weather_data.txt"
 REQUIRED_FIELDS = ['DATE', 'HourlyDewPointTemperature', 'HourlyWetBulbTemperature', 'HourlyRelativeHumidity', 'HourlyDryBulbTemperature']
 
+def read_lines():
+    with open(OUTPUT_TEXT_FILE, 'r') as output_file:
+        locations = output_file.readlines()
+
+    return locations
+
+
 def extract_content(file):
     """
     Function to extract content from the given CSV file and
@@ -34,7 +41,7 @@ def extract_content(file):
 # Defining beam pipeline
 
 def run_beam_pipeline():
-    with beam.pipeline() as pipeline:
+    with beam.Pipeline() as pipeline:
         files = (
             pipeline
             | "Form a list of csv files" >> beam.Create(os.listdir(UNZIP_FOLDER_LOCATION))
@@ -42,3 +49,7 @@ def run_beam_pipeline():
             | "Extract content into a tuple" >> beam.Map(extract_content)
             | "Write the tuples into a text file" >> beam.io.WriteToText(OUTPUT_TEXT_FILE)
         )
+
+
+if __name__ == "__main__":
+    run_beam_pipeline()
