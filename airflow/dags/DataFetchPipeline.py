@@ -28,45 +28,57 @@ def fetch_file_links():
     it retrieves the links for the .csv files in the HTML file and returns
     the list of links to be downloaded.
     """
-    with open(LINK_PARSE_LOCATION, "r") as f:
-        html_content = f.read()
+    try:
+        with open(LINK_PARSE_LOCATION, "r") as f:
+            html_content = f.read()
 
-    soup = BeautifulSoup(html_content, 'html.parser')
-    file_links = [link.get("href") for link in soup.find_all("a")]
-    file_links = [link for link in file_links if link.endswith('.csv')]
+        soup = BeautifulSoup(html_content, 'html.parser')
+        file_links = [link.get("href") for link in soup.find_all("a")]
+        file_links = [link for link in file_links if link.endswith('.csv')]
 
-    selected_files = np.random.choice(file_links, size=REQUIRED_FILES)
+        selected_files = np.random.choice(file_links, size=REQUIRED_FILES)
 
-    return selected_files
+        return selected_files
 
+    except Exception as e:
+        raise ValueError(f"Error while fetching links from the HTML file: {str(e)}")
 
+    
 def fetch_data():
     """
     Function to download the content from all the .csv files and
     stores the files in a folder that will be zipped in the next task.
     """
-    selected_files = fetch_file_links()
-    os.makedirs(FILE_STORE_LOCATION, exist_ok=True)
+    try:
+        selected_files = fetch_file_links()
+        os.makedirs(FILE_STORE_LOCATION, exist_ok=True)
 
-    for file in selected_files:
-        file_path = f'{FILE_STORE_LOCATION}{file}'
-        file_link = f'{BASE_URL}{YEAR}/{file}'
+        for file in selected_files:
+            file_path = f'{FILE_STORE_LOCATION}{file}'
+            file_link = f'{BASE_URL}{YEAR}/{file}'
 
-        response = requests.get(file_link)
+            response = requests.get(file_link)
 
-        with open(file_path, "wb") as f:
-            f.write(response.content)
+            with open(file_path, "wb") as f:
+                f.write(response.content)
+    
+    except Exception as e:
+        raise ValueError(f"Error in downlading data from the links: {str(e)}")
 
 
 def zip_files():
     """
     Function to zip the downloaded .csv files.
     """
-    files = [os.path.join(FILE_STORE_LOCATION, file) for file in os.listdir(FILE_STORE_LOCATION)]
+    try:
+        files = [os.path.join(FILE_STORE_LOCATION, file) for file in os.listdir(FILE_STORE_LOCATION)]
 
-    with zipfile.ZipFile(ZIP_FILE_LOCATION, "w") as f:
-        for file in files:
-            f.write(file, os.path.basename(file))
+        with zipfile.ZipFile(ZIP_FILE_LOCATION, "w") as f:
+            for file in files:
+                f.write(file, os.path.basename(file))
+
+    except Exception as e:
+        raise ValueError(f"Error in zipping the downloaded files: {str(e)}")
 
 
 # Defining the default arguments for DAG
