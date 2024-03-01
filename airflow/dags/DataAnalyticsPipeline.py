@@ -14,7 +14,8 @@ from datetime import datetime, timedelta
 
 ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
 UNZIP_FOLDER_LOCATION = "/opt/airflow/logs/artifacts/unzipped_climate_data/"
-BEAM_PIPELINE_FILE = "/opt/airflow/dags/BeamPipeline.py"
+EXTRACT_BEAM_PIPELINE_FILE = "/opt/airflow/dags/BeamPipeline.py"
+COMPUTE_BEAM_PIPELINE_FILE = "/opt/airflow/dags/BeamPipeline2.py"
 
 # Defining the default arguments for DAG
 
@@ -45,10 +46,16 @@ with DAG(
     )
     extract_content_beam_task = BeamRunPythonPipelineOperator(
         task_id='extract_content_to_tuple',
-        py_file=BEAM_PIPELINE_FILE,
+        py_file=EXTRACT_BEAM_PIPELINE_FILE,
+        pipeline_options={'runner': 'DirectRunner'},
+    )
+    compute_averages_task = BeamRunPythonPipelineOperator(
+        task_id='compute_monthly_averages',
+        py_file=COMPUTE_BEAM_PIPELINE_FILE,
         pipeline_options={'runner': 'DirectRunner'},
     )
 
 
 # Defining the order of the tasks
+
 wait_for_archive_task >> unzip_file_task >> extract_content_beam_task

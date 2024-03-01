@@ -33,7 +33,7 @@ def extract_content(file):
 
 # Defining beam pipeline
 
-def beam_pipeline():
+def run_beam_pipeline():
     with beam.pipeline() as pipeline:
         files = (
             pipeline
