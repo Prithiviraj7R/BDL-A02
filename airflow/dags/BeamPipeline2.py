@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 
 # Defining required fields: File locations 
-OUTPUT_JSON_FILE = "/opt/airflow/logs/artifacts/weather_data.json-00000-of-00001"
+OUTPUT_JSON_FILE = "/opt/airflow/logs/artifacts/weather_data.json"
 MONTHLY_AVERAGES_FILE = '/opt/airflow/logs/artifacts/monthly_averages.json'
 
 
@@ -68,7 +68,7 @@ def run_beam_pipeline():
             | 'Read Text file' >> beam.Create([None])  
             | 'Read and Process Lines' >> beam.FlatMap(read_lines)
             | 'Calculate Monthly Averages' >> beam.Map(compute_monthly_averages)
-            | 'Store in text file' >> beam.io.WriteToText(MONTHLY_AVERAGES_FILE)
+            | 'Store in text file' >> beam.io.WriteToText(MONTHLY_AVERAGES_FILE, shard_name_template='', num_shards=1)
         )
 
 

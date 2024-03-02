@@ -6,7 +6,6 @@ from airflow.operators.python import PythonOperator
 from airflow.contrib.sensors.file_sensor import FileSensor
 from airflow.providers.apache.beam.operators.beam import BeamRunPythonPipelineOperator
 import apache_beam as beam
-# from apache_beam.runners.interactive.interactive_runner import InteractiveRunner
 
 from datetime import datetime, timedelta
 
@@ -16,6 +15,19 @@ ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
 UNZIP_FOLDER_LOCATION = "/opt/airflow/logs/artifacts/unzipped_climate_data/"
 EXTRACT_BEAM_PIPELINE_FILE = "/opt/airflow/dags/BeamPipeline.py"
 COMPUTE_BEAM_PIPELINE_FILE = "/opt/airflow/dags/BeamPipeline2.py"
+PLOT_BEAM_PIPELINE_FILE = "/opt/airflow/dags/BeamPipeline3.py"
+
+OUTPUT_JSON_FILE = "/opt/airflow/logs/artifacts/weather_data.json"
+MONTHLY_AVERAGES_FILE = '/opt/airflow/logs/artifacts/monthly_averages.json'
+ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
+
+PLOT_SAVE_LOCATION = '/opt/airflow/logs/templates/'
+GIF_LOCATION = '/opt/airflow/logs/templates/compilation.gif'
+REQUIRED_FIELDS = ['HourlyWindSpeed', 'HourlyDryBulbTemperature']
+
+bash_create_gif = ''
+for feature in REQUIRED_FIELDS:
+    bash_create_gif += f'{PLOT_SAVE_LOCATION}{feature}.png '
 
 # Defining the default arguments for DAG
 
@@ -53,8 +65,21 @@ with DAG(
         py_file=COMPUTE_BEAM_PIPELINE_FILE,
         pipeline_options={'runner': 'DirectRunner'},
     )
+    plot_geo_map_task = BeamRunPythonPipelineOperator(
+        task_id='plot_geo_maps',
+        py_file=PLOT_BEAM_PIPELINE_FILE,
+        pipeline_options={'runner': 'DirectRunner'},
+    )
+    delete_files_task = BashOperator(
+        task_id='delete_csv_files', 
+        bash_command=f'rm {OUTPUT_JSON_FILE} {ZIP_FILE_LOCATION}'
+    )
+    create_gif_task = BashOperator(
+        task_id='create_gif',
+        bash_command=f'convert -delay 100 -loop 0 {bash_create_gif}{GIF_LOCATION}'
+    )
 
 
 # Defining the order of the tasks
 
-wait_for_archive_task >> unzip_file_task >> extract_content_beam_task >> compute_averages_task
+wait_for_archive_task >> unzip_file_task >> extract_content_beam_task >> compute_averages_task >> plot_geo_map_task >> delete_files_task >> create_gif_task

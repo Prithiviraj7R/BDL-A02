@@ -49,7 +49,7 @@ def run_beam_pipeline():
             | "Form a list of csv files" >> beam.Create(os.listdir(UNZIP_FOLDER_LOCATION))
             | "Read CSV files into a dataframe" >> beam.Map(lambda file: os.path.join(UNZIP_FOLDER_LOCATION, file))
             | "Extract content into a tuple" >> beam.Map(extract_content)
-            | "Write the tuples into a text file" >> beam.io.WriteToText(OUTPUT_JSON_FILE)
+            | "Write the tuples into a text file" >> beam.io.WriteToText(OUTPUT_JSON_FILE, shard_name_template='', num_shards=1)
         )
 
 
