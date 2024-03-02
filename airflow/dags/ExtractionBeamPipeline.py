@@ -1,3 +1,5 @@
+# Importing necessary libraries
+
 import apache_beam as beam
 
 import os
@@ -27,12 +29,14 @@ def extract_content(file):
 
         weather_data = weather_fields.values.tolist()
 
+        # creating a dictionary to write the extracted data into JSON file
         weather_dict = {
             'latitude': latitude,
             'longitude': longitude,
             'weather_data': weather_data
         }
 
+        # converting the dictionary into JSON format
         json_data = json.dumps(weather_dict)
         return json_data
 

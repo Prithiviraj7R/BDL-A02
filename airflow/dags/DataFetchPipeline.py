@@ -18,7 +18,7 @@ LINK_PARSE_LOCATION = "/opt/airflow/logs/artifacts/page_content.html"
 FILE_STORE_LOCATION = "/opt/airflow/logs/artifacts/climate_data/"
 ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
 
-REQUIRED_FILES = 15
+REQUIRED_FILES = 20
 YEAR = 2020
 
 
@@ -98,14 +98,15 @@ with DAG(
     schedule=None
 ) as dag:
 
+    # task to get the links available in the given URL
     fetch_page_task = BashOperator(task_id='fetch_page_task', bash_command=f"curl -o {LINK_PARSE_LOCATION} {BASE_URL}{YEAR}/")
+
+    # task to download files from the retrieved links
     fetch_data_task = PythonOperator(task_id='fetch_data_task', python_callable=fetch_data)
+
+    # task to zip the downloaded files
     zip_files_to_archive = PythonOperator(task_id='zip_files_to_archive', python_callable=zip_files)
-    delete_files_task = BashOperator(
-        task_id='delete_csv_files', 
-        bash_command=f'rm -r {FILE_STORE_LOCATION} && rm {LINK_PARSE_LOCATION}'
-    )
 
 
 # Defining the order of the tasks
-fetch_page_task >> fetch_data_task >> zip_files_to_archive >> delete_files_task
+fetch_page_task >> fetch_data_task >> zip_files_to_archive
