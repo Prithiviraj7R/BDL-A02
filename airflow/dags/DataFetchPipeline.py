@@ -18,7 +18,7 @@ LINK_PARSE_LOCATION = "/opt/airflow/logs/artifacts/page_content.html"
 FILE_STORE_LOCATION = "/opt/airflow/logs/artifacts/climate_data/"
 ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
 
-REQUIRED_FILES = 20
+REQUIRED_FILES = 100
 YEAR = 2020
 
 

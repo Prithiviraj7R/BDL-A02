@@ -8,6 +8,7 @@ from airflow.providers.apache.beam.operators.beam import BeamRunPythonPipelineOp
 import apache_beam as beam
 import subprocess
 import os
+import imageio
 
 from datetime import datetime, timedelta
 
@@ -27,26 +28,23 @@ FILE_STORE_LOCATION = "/opt/airflow/logs/artifacts/climate_data/"
 
 PLOT_SAVE_LOCATION = '/opt/airflow/logs/templates/'
 GIF_LOCATION = '/opt/airflow/logs/templates/gifs/'
-REQUIRED_FIELDS = ['HourlyWindSpeed', 'HourlyDryBulbTemperature']
+REQUIRED_FIELDS = ['HourlyWindSpeed', 'HourlyDryBulbTemperature', 'HourlyDewPointTemperature', 'HourlyPressureChange']
 
-
-# compiling the bash commands for generating GIF
-
-gif_base_command = 'convert -delay 100 -loop 0'
-gif_commands = []
 os.makedirs(GIF_LOCATION, exist_ok=True)
 
-for feature in REQUIRED_FIELDS:
-    image_location = ''
-    for month in range(1,13):
-        image_location += f'{PLOT_SAVE_LOCATION}{feature}_month_{month}.png '
-    gif_store_location = os.path.join(GIF_LOCATION, f'{feature}.gif')
-    gif_commands.append(f'{gif_base_command} {image_location}{gif_store_location}')
-
-
 def compile_gif():
-    for command in gif_commands:
-        subprocess.run(command)
+    """
+    Function to create gif from compilation of 12 months geo maps
+    """
+    for feature in REQUIRED_FIELDS:
+        image_location = []
+        gif_store_location = os.path.join(GIF_LOCATION, f'{feature}.gif')
+        
+        for month in range(1, 13):
+            image_location.append(f'{PLOT_SAVE_LOCATION}{feature}_month_{month}.png')
+
+        images = [imageio.imread(img) for img in image_location]
+        imageio.mimsave(gif_store_location, images, duration=5.0)
 
 # Defining the default arguments for DAG
 
@@ -114,8 +112,6 @@ with DAG(
     )
 
     
-
-
 # Defining the order of the tasks
 
 wait_for_archive_task >> unzip_file_task >> extract_content_beam_task >> compute_averages_task >> plot_geo_map_task >> create_gif_task >> delete_files_task

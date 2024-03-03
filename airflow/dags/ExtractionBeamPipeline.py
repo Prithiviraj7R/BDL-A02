@@ -11,7 +11,7 @@ import json
 
 UNZIP_FOLDER_LOCATION = "/opt/airflow/logs/artifacts/unzipped_climate_data/"
 OUTPUT_JSON_FILE = "/opt/airflow/logs/artifacts/weather_data.json"
-REQUIRED_FIELDS = ['DATE', 'HourlyWindSpeed', 'HourlyDryBulbTemperature']
+REQUIRED_FIELDS = ['DATE', 'HourlyWindSpeed', 'HourlyDryBulbTemperature', 'HourlyDewPointTemperature', 'HourlyPressureChange']
 
 
 def extract_content(file):

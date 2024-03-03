@@ -15,7 +15,7 @@ import json
 MONTHLY_AVERAGES_FILE = '/opt/airflow/logs/artifacts/monthly_averages.json'
 WORLD_MAP_SHAPE_FILE = '/opt/airflow/logs/templates/copy_4.shp'
 PLOT_SAVE_LOCATION = '/opt/airflow/logs/templates/'
-REQUIRED_FIELDS = ['HourlyWindSpeed', 'HourlyDryBulbTemperature']
+REQUIRED_FIELDS = ['HourlyWindSpeed', 'HourlyDryBulbTemperature', 'HourlyDewPointTemperature', 'HourlyPressureChange']
 MONTH = 1
 
 def plot_geo_map(dummy):

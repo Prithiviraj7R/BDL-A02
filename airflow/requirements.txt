@@ -4,3 +4,4 @@ apache-airflow-providers-apache-beam
 matplotlib
 geopandas
 shapely
+imageio

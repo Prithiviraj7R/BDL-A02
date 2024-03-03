@@ -8,6 +8,7 @@ import json
 # Defining required fields: File locations 
 OUTPUT_JSON_FILE = "/opt/airflow/logs/artifacts/weather_data.json"
 MONTHLY_AVERAGES_FILE = '/opt/airflow/logs/artifacts/monthly_averages.json'
+REQUIRED_FIELDS = ['HourlyWindSpeed', 'HourlyDryBulbTemperature', 'HourlyDewPointTemperature', 'HourlyPressureChange']
 
 
 def read_lines(dummy):
@@ -28,7 +29,7 @@ def compute_monthly_averages(data):
     Avg_MN]]> for N fields and M months.
     """
 
-    all_monthly_averages = {i: [] for i in range(1,13)}
+    all_monthly_averages = {i: [0.0]*len(REQUIRED_FIELDS) for i in range(1,13)}
 
     latitude, longitude, weather_data = data['latitude'], data['longitude'], data['weather_data']
 
@@ -56,7 +57,7 @@ def compute_monthly_averages(data):
         monthly_averages = np.mean(weather_fields_monthly, axis=0)
 
         if month not in all_monthly_averages:
-            all_monthly_averages[month] = []
+            all_monthly_averages[month] = [0.0, 0.0]
 
         all_monthly_averages[month] = monthly_averages.tolist()
 
