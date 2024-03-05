@@ -17,6 +17,7 @@ BASE_URL = "https://www.ncei.noaa.gov/data/local-climatological-data/access/"
 LINK_PARSE_LOCATION = "/opt/airflow/logs/artifacts/page_content.html"
 FILE_STORE_LOCATION = "/opt/airflow/logs/artifacts/climate_data/"
 ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
+ARTIFACTS_LOCATION = "/opt/airflow/logs/artifacts/"
 
 REQUIRED_FILES = 100
 YEAR = 2020
@@ -100,7 +101,7 @@ with DAG(
 ) as dag:
 
     # task to get the links available in the given URL
-    fetch_page_task = BashOperator(task_id='fetch_page_task', bash_command=f"curl -o {LINK_PARSE_LOCATION} {BASE_URL}{YEAR}/")
+    fetch_page_task = BashOperator(task_id='fetch_page_task', bash_command=f"mkdir -p {ARTIFACTS_LOCATION} && curl -o {LINK_PARSE_LOCATION} {BASE_URL}{YEAR}/")
 
     # task to download files from the retrieved links
     fetch_data_task = PythonOperator(task_id='fetch_data_task', python_callable=fetch_data)
