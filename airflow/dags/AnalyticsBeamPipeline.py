@@ -111,7 +111,7 @@ def run_beam_pipeline():
             | "Get the file paths of csv files" >> beam.Map(lambda file: os.path.join(UNZIP_FOLDER_LOCATION, file))
             | "Extarct tuples from csv files" >> beam.Map(extract_content)
             | "Compute monthly averages" >> beam.Map(compute_monthly_averages)
-            | "Write the tuples into a JSON file" >> beam.io.WriteToText(MONTHLY_AVERAGES_FILE)
+            | "Write the tuples into a JSON file" >> beam.io.WriteToText(MONTHLY_AVERAGES_FILE, shard_name_template='')
         )
 
 
