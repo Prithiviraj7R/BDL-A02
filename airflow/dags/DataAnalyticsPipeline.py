@@ -16,8 +16,7 @@ from datetime import datetime, timedelta
 
 ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
 UNZIP_FOLDER_LOCATION = "/opt/airflow/logs/artifacts/unzipped_climate_data/"
-EXTRACT_BEAM_PIPELINE_FILE = "/opt/airflow/dags/ExtractionBeamPipeline.py"
-COMPUTE_BEAM_PIPELINE_FILE = "/opt/airflow/dags/ComputationBeamPipeline.py"
+ANALYTICS_BEAM_PIPELINE_FILE = "/opt/airflow/dags/AnalyticsBeamPipeline.py"
 PLOT_BEAM_PIPELINE_FILE = "/opt/airflow/dags/PlotBeamPipeline.py"
 
 OUTPUT_JSON_FILE = "/opt/airflow/logs/artifacts/weather_data.json"
@@ -44,7 +43,7 @@ def compile_gif():
             image_location.append(f'{PLOT_SAVE_LOCATION}{feature}_month_{month}.png')
 
         images = [imageio.imread(img) for img in image_location]
-        imageio.mimsave(gif_store_location, images, duration=5.0)
+        imageio.mimsave(gif_store_location, images, duration=500)
 
 # Defining the default arguments for DAG
 
@@ -52,7 +51,8 @@ default_args = {
     'owner': 'airflow',
     'start_date': datetime(2024, 3, 1),
     'retries': 2,
-    'retry_delay': timedelta(minutes=1)
+    'retry_delay': timedelta(minutes=1),
+    'schedule_interval': timedelta(minutes=1)
 }
 
 # Defining the DAG tasks
@@ -78,17 +78,10 @@ with DAG(
         bash_command=f'unzip -t {ZIP_FILE_LOCATION} && mkdir -p {UNZIP_FOLDER_LOCATION} && unzip -o {ZIP_FILE_LOCATION} -d {UNZIP_FOLDER_LOCATION}'
     )
 
-    # task to extract the contents of the CSV into a tuple
-    extract_content_beam_task = BeamRunPythonPipelineOperator(
-        task_id='extract_content_to_tuple',
-        py_file=EXTRACT_BEAM_PIPELINE_FILE,
-        pipeline_options={'runner': 'DirectRunner'},
-    )
-
-    # task to compute monthly averages into a tuple
+    # task to extract the contents of the CSV and compute monthly averages for each field
     compute_averages_task = BeamRunPythonPipelineOperator(
-        task_id='compute_monthly_averages',
-        py_file=COMPUTE_BEAM_PIPELINE_FILE,
+        task_id='data_processing',
+        py_file=ANALYTICS_BEAM_PIPELINE_FILE,
         pipeline_options={'runner': 'DirectRunner'},
     )
 
@@ -108,12 +101,12 @@ with DAG(
     # task to delete the files that are unused and not required for further downstream tasks
     delete_files_task = BashOperator(
         task_id='delete_csv_files', 
-        bash_command=f'rm -r {FILE_STORE_LOCATION} && rm {LINK_PARSE_LOCATION} {OUTPUT_JSON_FILE} {ZIP_FILE_LOCATION}'
+        bash_command=f'rm -r {FILE_STORE_LOCATION} && rm {LINK_PARSE_LOCATION} {ZIP_FILE_LOCATION}'
     )
 
     
 # Defining the order of the tasks
 
-wait_for_archive_task >> unzip_file_task >> extract_content_beam_task >> compute_averages_task >> plot_geo_map_task >> create_gif_task >> delete_files_task
+wait_for_archive_task >> unzip_file_task >> compute_averages_task  >> plot_geo_map_task >> create_gif_task >> delete_files_task
 
 

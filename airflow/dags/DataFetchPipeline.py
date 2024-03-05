@@ -87,7 +87,8 @@ default_args = {
     'owner': 'airflow',
     'start_date': datetime(2024, 3, 1),
     'retries': 2,
-    'retry_delay': timedelta(minutes=1)
+    'retry_delay': timedelta(minutes=1),
+    'schedule_interval': timedelta(minutes=1)
 }
 
 # Defining the DAG

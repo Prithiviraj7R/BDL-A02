@@ -70,6 +70,7 @@ def plot_geo_map(dummy):
             ax.set_xlabel('Longitude')
             ax.set_ylabel('Latitude')
 
+            plt.tight_layout()
             plt.savefig(f'{PLOT_SAVE_LOCATION}{feature}_month_{month}.png')
             plt.close()
 
