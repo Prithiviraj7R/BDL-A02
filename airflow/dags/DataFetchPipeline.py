@@ -19,7 +19,7 @@ FILE_STORE_LOCATION = "/opt/airflow/logs/artifacts/climate_data/"
 ZIP_FILE_LOCATION = "/opt/airflow/logs/artifacts/climate_data_archive.zip"
 ARTIFACTS_LOCATION = "/opt/airflow/logs/artifacts/"
 
-REQUIRED_FILES = 100
+REQUIRED_FILES = 10
 YEAR = 2020
 
 
